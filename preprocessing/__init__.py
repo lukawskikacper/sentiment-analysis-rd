@@ -1,6 +1,10 @@
 import re
+import logging
 
 from nltk.corpus import stopwords
+
+# Get logger for current module
+logger = logging.getLogger(__name__)
 
 
 class TextPreprocessor(object):
@@ -17,11 +21,12 @@ class TwitterTextPreprocessor(TextPreprocessor):
                            r"([!\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*)(\s|$)",
                            re.UNICODE | re.I)
 
-    def preprocess(self, message):
-        message = message.lower()
+    def preprocess(self, raw_message):
+        message = raw_message.lower()
         message = self.HASHTAG_REGEX.sub("\\1", message)
         message = self.MENTION_REGEX.sub("twitter_account", message)
         message = self.URL_REGEX.sub("external_link ", message)
         message = " ".join(word for word in message.split()
                            if word not in self.ENGLISH_STOPWORDS)
+        logger.debug("Message '%s' preprocessed to '%s'", raw_message, message)
         return message

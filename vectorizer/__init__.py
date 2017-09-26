@@ -1,10 +1,14 @@
 import numpy as np
+import logging
 
 from scipy.sparse import hstack
 
 from sklearn.feature_extraction.text import CountVectorizer
 
 from loader import load_emoji_mapping
+
+# Get logger for current module
+logger = logging.getLogger(__name__)
 
 
 class FeatureAndCountVectorizer(CountVectorizer):

@@ -1,8 +1,15 @@
+# -*- coding: UTF-8 -*-
 import csv
+import logging
+import ftfy
+
 from configparser import ConfigParser
 from itertools import chain
 
 from message import Sentiment
+
+# Get logger for current module
+logger = logging.getLogger(__name__)
 
 
 def airline_sentiment_to_sentiment(airline_sentiment):
@@ -41,6 +48,7 @@ def load_airlines_data():
             messages.append(zipped["text"].strip())
             targets.append(
                 airline_sentiment_to_sentiment(zipped["airline_sentiment"]))
+    logger.info("Loaded %d messages from airlines dataset", len(messages))
     return messages, targets
 
 
@@ -63,6 +71,7 @@ def load_thinknook_data():
             messages.append(zipped["SentimentText"].strip())
             targets.append(
                 thinknook_sentiment_to_sentiment(zipped["Sentiment"]))
+    logger.info("Loaded %d messages from thinknook dataset", len(messages))
     return messages, targets
 
 
@@ -73,8 +82,6 @@ def load_emoji_mapping():
     and value is its description.
     :return: emojis mapping
     """
-    parser = ConfigParser()
-    with open("data/emoji_mapping.properties", "r") as file:
-        lines = chain(("[emoji]", ), file)
-        parser.read_file(lines)
-    return dict(parser["emoji"])
+    with open("data/emoji_mapping.properties", "r",
+              encoding="unicode_escape", errors="replace") as file:
+        return dict(ftfy.fix_text(line).split("=", 1) for line in file)

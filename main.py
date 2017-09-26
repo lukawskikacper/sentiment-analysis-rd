@@ -1,10 +1,12 @@
+# -*- coding: UTF-8 -*-
 import copy
 import random
 import dill
 import itertools
+import logging
 
 from multiprocessing import Pool
-from loader import load_airlines_data, load_thinknook_data
+from loader import load_airlines_data, load_thinknook_data, load_emoji_mapping
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
@@ -17,6 +19,9 @@ from sklearn.metrics import accuracy_score
 
 from preprocessing import TwitterTextPreprocessor
 from vectorizer import FeatureAndCountVectorizer
+
+# Get logger for current module
+logger = logging.getLogger(__name__)
 
 # Load all the messages along with their targets
 messages, targets = [], []
