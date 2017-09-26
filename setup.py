@@ -9,7 +9,7 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
 setup(
     name='sentiment-analysis-rd',
     version='1.0.0',
-    packages=['soundscrape'],
+    packages=['loader', 'message', 'preprocessing', 'vectorizer'],
     install_requires=required,
     extras_require={},
     include_package_data=True,
