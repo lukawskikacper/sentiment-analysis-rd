@@ -2,13 +2,42 @@ import numpy as np
 import logging
 
 from scipy.sparse import hstack
+from sklearn.decomposition import TruncatedSVD
 
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 from loader import load_emoji_mapping
 
 # Get logger for current module
 logger = logging.getLogger(__name__)
+
+
+class PCATfidfVectorizer(TfidfVectorizer):
+    """
+    An extension of TfidfVectorizer with additional PCA, which limits the dimensionality
+    """
+
+    def __init__(self, input='content', encoding='utf-8', decode_error='strict', strip_accents=None, lowercase=True,
+                 preprocessor=None, tokenizer=None, analyzer='word', stop_words=None, token_pattern=r"(?u)\b\w\w+\b",
+                 ngram_range=(1, 1), max_df=1.0, min_df=1, max_features=None, vocabulary=None, binary=False,
+                 dtype=np.int64, norm='l2', use_idf=True, smooth_idf=True, sublinear_tf=False,
+                 pca_n_component=500, pca_n_iter=2, pca_random_state=42):
+        super().__init__(input, encoding, decode_error, strip_accents, lowercase, preprocessor, tokenizer, analyzer,
+                         stop_words, token_pattern, ngram_range, max_df, min_df, max_features, vocabulary, binary,
+                         dtype, norm, use_idf, smooth_idf, sublinear_tf)
+        self._pca = TruncatedSVD(n_components=pca_n_component, n_iter=pca_n_iter, random_state=pca_random_state)
+
+    def fit(self, raw_documents, y=None):
+        vectorized_documents = super().fit_transform(raw_documents, y)
+        return self._pca.fit(vectorized_documents, y)
+
+    def transform(self, raw_documents, copy=True):
+        vectorized_documents = super().transform(raw_documents)
+        return self._pca.transform(vectorized_documents)
+
+    def fit_transform(self, raw_documents, y=None):
+        vectorized_document = super().fit_transform(raw_documents, y)
+        return self._pca.fit_transform(vectorized_document, y)
 
 
 class FeatureAndCountVectorizer(CountVectorizer):

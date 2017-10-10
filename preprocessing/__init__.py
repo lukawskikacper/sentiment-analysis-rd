@@ -4,6 +4,8 @@ import logging
 from nltk.corpus import stopwords
 
 # Get logger for current module
+from loader import load_emoji_mapping
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,9 +22,12 @@ class TwitterTextPreprocessor(TextPreprocessor):
     URL_REGEX = re.compile(r"(?:(http://)|(www\.))(\S+\b/?)"
                            r"([!\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*)(\s|$)",
                            re.UNICODE | re.I)
+    EMOJI_MAPPING = load_emoji_mapping()
 
     def preprocess(self, raw_message):
         message = raw_message.lower()
+        for emoji, text_description in self.EMOJI_MAPPING.items():
+            message = message.replace(emoji, text_description)
         message = self.HASHTAG_REGEX.sub("\\1", message)
         message = self.MENTION_REGEX.sub("twitter_account", message)
         message = self.URL_REGEX.sub("external_link ", message)
