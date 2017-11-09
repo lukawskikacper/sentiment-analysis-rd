@@ -1,24 +1,23 @@
 # -*- coding: UTF-8 -*-
 import copy
-import random
-import dill
+import datetime
 import itertools
 import logging
-import datetime
+import random
+import dill
 
 from multiprocessing import Pool
-from loader import load_airlines_data, load_thinknook_data, load_emoji_mapping
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, \
+    GradientBoostingClassifier, ExtraTreesClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.naive_bayes import GaussianNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, \
-    GradientBoostingClassifier, ExtraTreesClassifier
-from sklearn.naive_bayes import GaussianNB, BernoulliNB
-from sklearn.metrics import accuracy_score
-from sklearn.decomposition import TruncatedSVD
 
+from loader import load_airlines_data, load_thinknook_data
 from preprocessing import TwitterTextPreprocessor
 from vectorizer import FeatureAndCountVectorizer, PCATfidfVectorizer
 
@@ -26,16 +25,16 @@ from vectorizer import FeatureAndCountVectorizer, PCATfidfVectorizer
 logger = logging.getLogger(__name__)
 
 # Load all the messages along with their targets
-messages, targets = [], []
+raw_messages, targets = [], []
 loaders = (load_airlines_data, load_thinknook_data, )
 for loader in loaders:
     loader_messages, loader_targets = loader()
-    messages.extend(loader_messages)
+    raw_messages.extend(loader_messages)
     targets.extend(loader_targets)
 
 # Preprocess the messages
 preprocessor = TwitterTextPreprocessor()
-messages = map(preprocessor.preprocess, messages)
+messages = map(preprocessor.preprocess, raw_messages)
 
 # Merge messages with targets and shuffle
 messages_with_targets = list(zip(messages, targets))
@@ -45,13 +44,10 @@ messages, targets = zip(*messages_with_targets)
 # Choose random test dataset
 test_fraction = 0.2
 test_fraction_index = int(len(messages) * test_fraction)
-# train_messages, test_messages = messages[:-test_fraction_index], \
-#                                 messages[-test_fraction_index:]
-# train_targets, test_targets = list(map(int, targets[:-test_fraction_index])), \
-#                               list(map(int, targets[-test_fraction_index:]))
-train_messages = test_messages = messages
-train_targets = test_targets = list(map(int, targets))
-del messages_with_targets, messages, targets
+train_messages, test_messages = messages[:-test_fraction_index], \
+                                messages[-test_fraction_index:]
+train_targets, test_targets = list(map(int, targets[:-test_fraction_index])), \
+                              list(map(int, targets[-test_fraction_index:]))
 
 # Display dataset summary
 print("Got %d train and %d test messages" % (len(train_messages),
@@ -59,27 +55,27 @@ print("Got %d train and %d test messages" % (len(train_messages),
 
 # Define vectorizers to be tested
 vectorizers = [
-    # CountVectorizer(analyzer="word"),
-    # TfidfVectorizer(),
+    CountVectorizer(analyzer="word"),
+    TfidfVectorizer(),
     PCATfidfVectorizer(pca_n_component=100, pca_n_iter=2, pca_random_state=42),
-    # FeatureAndCountVectorizer(analyzer="word")
+    FeatureAndCountVectorizer(analyzer="word")
 ]
 
 # Create all the classifiers for the comparison
 classifiers = [
-    # LogisticRegression(C=0.000000001, solver='liblinear', max_iter=10000),
-    # KNeighborsClassifier(3),
-    # SVC(kernel="rbf", C=0.025, probability=True),
-    # LinearSVC(),
-    # DecisionTreeClassifier(),
-    # GradientBoostingClassifier(),
+    LogisticRegression(C=0.000000001, solver='liblinear', max_iter=10000),
+    KNeighborsClassifier(3),
+    SVC(kernel="rbf", C=0.025, probability=True),
+    LinearSVC(),
+    DecisionTreeClassifier(),
+    GradientBoostingClassifier(),
     RandomForestClassifier(n_estimators=35, verbose=3, n_jobs=5,
                            bootstrap=False, random_state=1,
-                           min_samples_leaf=2),
-    # ExtraTreesClassifier(n_estimators=200),
-    # AdaBoostClassifier(),
-    # GaussianNB(),
-    # BernoulliNB()
+                           min_samples_leaf=4),
+    ExtraTreesClassifier(n_estimators=200),
+    AdaBoostClassifier(),
+    GaussianNB(),
+    BernoulliNB()
 ]
 
 
@@ -132,6 +128,10 @@ def process_vectorizer_with_classifier(vc):
             "classifier": classifier,
             "vectorizer": vectorizer
         }, fp)
+    for m, t in messages_with_targets:
+        print(m, " -> ", t, ": ", classifier.predict(
+            vectorizer.transform([preprocessor.preprocess(m)]
+        )))
     return result
 
 

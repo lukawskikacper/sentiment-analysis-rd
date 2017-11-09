@@ -63,6 +63,7 @@ def load_thinknook_data():
     with open("data/twitter-thinknook-sentiment.csv", "r") as csvfile:
         reader = csv.reader(csvfile, delimiter=",", quotechar="\"")
         headers = None
+        num_messages = 0
         for row in reader:
             if 1 == reader.line_num:
                 headers = row
@@ -71,6 +72,9 @@ def load_thinknook_data():
             messages.append(zipped["SentimentText"].strip())
             targets.append(
                 thinknook_sentiment_to_sentiment(zipped["Sentiment"]))
+            num_messages += 1
+            if num_messages == 100000:
+                break
     logger.info("Loaded %d messages from thinknook dataset", len(messages))
     return messages, targets
 
