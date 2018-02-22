@@ -63,19 +63,19 @@ vectorizers = [
 
 # Create all the classifiers for the comparison
 classifiers = [
-    LogisticRegression(C=0.000000001, solver='liblinear', max_iter=10000),
-    KNeighborsClassifier(3),
-    SVC(kernel="rbf", C=0.025, probability=True),
-    LinearSVC(),
-    DecisionTreeClassifier(),
-    GradientBoostingClassifier(),
+    # LogisticRegression(C=0.000000001, solver='liblinear', max_iter=10000),
+    # KNeighborsClassifier(3),
+    # SVC(kernel="rbf", C=0.025, probability=True),
+    # LinearSVC(),
+    # DecisionTreeClassifier(),
+    # GradientBoostingClassifier(),
     RandomForestClassifier(n_estimators=35, verbose=3, n_jobs=5,
                            bootstrap=False, random_state=1,
                            min_samples_leaf=4),
-    ExtraTreesClassifier(n_estimators=200),
-    AdaBoostClassifier(),
-    GaussianNB(),
-    BernoulliNB()
+    # ExtraTreesClassifier(n_estimators=200),
+    # AdaBoostClassifier(),
+    # GaussianNB(),
+    # BernoulliNB()
 ]
 
 
