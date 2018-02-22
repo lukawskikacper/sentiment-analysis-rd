@@ -2,10 +2,9 @@ import re
 import logging
 
 from nltk.corpus import stopwords
-
-# Get logger for current module
 from loader import load_emoji_mapping
 
+# Get logger for current module
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +30,5 @@ class TwitterTextPreprocessor(TextPreprocessor):
         message = self.HASHTAG_REGEX.sub("\\1", message)
         message = self.MENTION_REGEX.sub("twitter_account", message)
         message = self.URL_REGEX.sub("external_link ", message)
-        # message = " ".join(word for word in message.split()
-        #                    if word not in self.ENGLISH_STOPWORDS)
         logger.debug("Message '%s' preprocessed to '%s'", raw_message, message)
         return message
