@@ -2,7 +2,7 @@ import re
 import logging
 
 from nltk.corpus import stopwords
-from loader import load_emoji_mapping
+from sentiment.loader import load_emoji_mapping
 
 # Get logger for current module
 logger = logging.getLogger(__name__)

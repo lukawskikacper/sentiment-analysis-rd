@@ -3,10 +3,8 @@ import logging
 
 from scipy.sparse import hstack
 from sklearn.decomposition import TruncatedSVD
-
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-
-from loader import load_emoji_mapping
+from sentiment.loader import load_emoji_mapping
 
 # Get logger for current module
 logger = logging.getLogger(__name__)

@@ -3,14 +3,10 @@ import io
 import os
 import csv
 import logging
-from zipfile import ZipFile
-
 import ftfy
 
-from configparser import ConfigParser
-from itertools import chain
-
-from message import Sentiment
+from zipfile import ZipFile
+from sentiment.message import Sentiment
 
 # Get logger for current module
 logger = logging.getLogger(__name__)
