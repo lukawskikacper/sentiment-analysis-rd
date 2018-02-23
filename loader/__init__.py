@@ -1,6 +1,10 @@
 # -*- coding: UTF-8 -*-
+import io
+import os
 import csv
 import logging
+from zipfile import ZipFile
+
 import ftfy
 
 from configparser import ConfigParser
@@ -36,8 +40,9 @@ def load_airlines_data():
     (negative, neutral, positive). The order of both lists is kept.
     :return: messages, targets
     """
+    abspath = os.path.dirname(__file__)
     messages, targets = [], []
-    with open("data/twitter-airlines-sentiment.csv", "r") as csvfile:
+    with open(abspath + "/../data/twitter-airlines-sentiment.csv", "r") as csvfile:
         reader = csv.reader(csvfile, delimiter=",", quotechar="\"")
         headers = None
         for row in reader:
@@ -59,22 +64,24 @@ def load_thinknook_data():
     (negative, neutral, positive). The order of both lists is kept.
     :return: messages, targets
     """
+    abspath = os.path.dirname(__file__)
     messages, targets = [], []
-    with open("data/twitter-thinknook-sentiment.csv", "r") as csvfile:
-        reader = csv.reader(csvfile, delimiter=",", quotechar="\"")
-        headers = None
-        num_messages = 0
-        for row in reader:
-            if 1 == reader.line_num:
-                headers = row
-                continue
-            zipped = dict(zip(headers, row))
-            messages.append(zipped["SentimentText"].strip())
-            targets.append(
-                thinknook_sentiment_to_sentiment(zipped["Sentiment"]))
-            num_messages += 1
-            if num_messages == 100000:
-                break
+    with ZipFile(abspath + "/../data/twitter-thinknook-sentiment.zip", "r") as zipfile:
+        with zipfile.open("twitter-thinknook-sentiment.csv", "r") as csvfile:
+            reader = csv.reader(io.TextIOWrapper(csvfile), delimiter=",", quotechar="\"")
+            headers = None
+            num_messages = 0
+            for row in reader:
+                if 1 == reader.line_num:
+                    headers = row
+                    continue
+                zipped = dict(zip(headers, row))
+                messages.append(zipped["SentimentText"].strip())
+                targets.append(
+                    thinknook_sentiment_to_sentiment(zipped["Sentiment"]))
+                num_messages += 1
+                if num_messages == 100000:
+                    break
     logger.info("Loaded %d messages from thinknook dataset", len(messages))
     return messages, targets
 
@@ -86,6 +93,7 @@ def load_emoji_mapping():
     and value is its description.
     :return: emojis mapping
     """
-    with open("data/emoji_mapping.properties", "r",
+    abspath = os.path.dirname(__file__)
+    with open(abspath + "/../data/emoji_mapping.properties", "r",
               encoding="unicode_escape", errors="replace") as file:
         return dict(ftfy.fix_text(line).split("=", 1) for line in file)
