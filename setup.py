@@ -8,8 +8,9 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
 
 setup(
     name='sentiment-analysis-rd',
-    version='1.1.2',
-    packages=['loader', 'message', 'preprocessing', 'vectorizer'],
+    version='1.1.3',
+    package_dir={'sentiment': '.'},
+    packages=['sentiment'],
     install_requires=required,
     extras_require={},
     include_package_data=True,
