@@ -5,6 +5,7 @@ import csv
 import logging
 import ftfy
 
+from pkg_resources import resource_string
 from zipfile import ZipFile
 from sentiment.message import Sentiment
 
@@ -36,9 +37,9 @@ def load_airlines_data():
     (negative, neutral, positive). The order of both lists is kept.
     :return: messages, targets
     """
-    abspath = os.path.dirname(__file__)
     messages, targets = [], []
-    with open(abspath + "/../data/twitter-airlines-sentiment.csv", "r") as csvfile:
+    input_file_path = resource_string(__name__, "data/twitter-airlines-sentiment.csv")
+    with open(input_file_path, "r") as csvfile:
         reader = csv.reader(csvfile, delimiter=",", quotechar="\"")
         headers = None
         for row in reader:
@@ -60,9 +61,9 @@ def load_thinknook_data():
     (negative, neutral, positive). The order of both lists is kept.
     :return: messages, targets
     """
-    abspath = os.path.dirname(__file__)
     messages, targets = [], []
-    with ZipFile(abspath + "/../data/twitter-thinknook-sentiment.zip", "r") as zipfile:
+    input_file_path = resource_string(__name__, "data/twitter-thinknook-sentiment.zip")
+    with ZipFile(input_file_path, "r") as zipfile:
         with zipfile.open("twitter-thinknook-sentiment.csv", "r") as csvfile:
             reader = csv.reader(io.TextIOWrapper(csvfile), delimiter=",", quotechar="\"")
             headers = None
@@ -89,7 +90,6 @@ def load_emoji_mapping():
     and value is its description.
     :return: emojis mapping
     """
-    abspath = os.path.dirname(__file__)
-    with open(abspath + "/../data/emoji_mapping.properties", "r",
-              encoding="unicode_escape", errors="replace") as file:
+    input_file_path = resource_string(__name__, "data/emoji_mapping.properties")
+    with open(input_file_path, "r", encoding="unicode_escape", errors="replace") as file:
         return dict(ftfy.fix_text(line).split("=", 1) for line in file)
