@@ -8,10 +8,13 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
 
 setup(
     name='sentiment-analysis-rd',
-    version='1.1.10',
-    package_dir={'sentiment': '.', 'sentiment.data': './data', 'sentiment.loader': './loader',
-                 'sentiment.message': './message', 'sentiment.preprocessing': './preprocessing',
-                 'sentiment.vectorizer': './vectorizer'},
+    version='1.1.11',
+    package_dir={'sentiment': './sentiment',
+                 'sentiment.data': './sentiment/data',
+                 'sentiment.loader': './sentiment/loader',
+                 'sentiment.message': './sentiment/message',
+                 'sentiment.preprocessing': './sentiment/preprocessing',
+                 'sentiment.vectorizer': './sentiment/vectorizer'},
     packages=['sentiment', 'sentiment.data', 'sentiment.loader', 'sentiment.message', 'sentiment.preprocessing',
               'sentiment.vectorizer'],
     package_data={"sentiment.data": ["emoji_mapping.properties", "twitter-airlines-sentiment.csv",

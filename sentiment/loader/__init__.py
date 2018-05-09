@@ -56,7 +56,7 @@ def load_airlines_data():
 
 def load_thinknook_data():
     """
-    Loads the data from twitter-thinknook-sentiment.csv file and returns it as
+    Loads the data from twitter-thinknook-sentiment.zip file and returns it as
     two iterables - one of raw tweets and another one as a list of targets
     (negative, neutral, positive). The order of both lists is kept.
     :return: messages, targets

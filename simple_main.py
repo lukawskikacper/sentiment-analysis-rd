@@ -7,9 +7,10 @@ import random
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import accuracy_score
-from loader import load_airlines_data, load_thinknook_data
-from preprocessing import TwitterTextPreprocessor
-from vectorizer import FeatureAndCountVectorizer, PCATfidfVectorizer
+
+from sentiment.loader import load_airlines_data, load_thinknook_data
+from sentiment.preprocessing import TwitterTextPreprocessor
+from sentiment.vectorizer import FeatureAndCountVectorizer, PCATfidfVectorizer
 
 # Get logger for current module
 logger = logging.getLogger(__name__)
