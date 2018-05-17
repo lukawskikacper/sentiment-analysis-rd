@@ -119,9 +119,9 @@ def process_vectorizer_with_classifier(vc):
     except Exception as e:
         print("Interrupted " + classifier.__class__.__name__ + " due to " + str(e))
         result = vectorizer.__class__, classifier.__class__, None
-    pickle_filename = "model_%s_%s_%s.pkl" % (str(classifier.__class__.__name__),
-                                              str(vectorizer.__class__.__name__),
-                                              str(datetime.datetime.utcnow()))
+    pickle_filename = "output/model_%s_%s_%s.pkl" % (str(classifier.__class__.__name__),
+                                                     str(vectorizer.__class__.__name__),
+                                                     str(datetime.datetime.utcnow()))
     with open(pickle_filename, 'wb') as fp:
         dill.dump({
             "preprocessor": preprocessor,

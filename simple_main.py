@@ -9,11 +9,12 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import accuracy_score
 
 from sentiment.loader import load_airlines_data, load_thinknook_data
-from sentiment.preprocessing import TwitterTextPreprocessor
+from sentiment.preprocessing import TwitterTextPreprocessor, StemmingTextPreprocessor
 from sentiment.vectorizer import FeatureAndCountVectorizer, PCATfidfVectorizer
 
 # Get logger for current module
 logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 # Load all the messages along with their targets
 raw_messages, targets = [], []
@@ -24,13 +25,15 @@ for loader in loaders:
     targets.extend(loader_targets)
 
 # Preprocess the messages
-preprocessor = TwitterTextPreprocessor()
+preprocessor = StemmingTextPreprocessor() # TwitterTextPreprocessor()
 messages = map(preprocessor.preprocess, raw_messages)
+logger.info("Preprocessed all the input messages")
 
 # Merge messages with targets and shuffle
 messages_with_targets = list(zip(messages, targets))
 random.shuffle(messages_with_targets)
 messages, targets = zip(*messages_with_targets)
+logger.info("Zipped messages with targets")
 
 # Choose random test dataset
 test_fraction = 0.2

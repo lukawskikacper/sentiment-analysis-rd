@@ -61,13 +61,13 @@ def load_thinknook_data():
     (negative, neutral, positive). The order of both lists is kept.
     :return: messages, targets
     """
+    num_messages = 0
     messages, targets = [], []
     input_file_path = resource_filename(__name__, "../data/twitter-thinknook-sentiment.zip")
     with ZipFile(input_file_path, "r") as zipfile:
         with zipfile.open("twitter-thinknook-sentiment.csv", "r") as csvfile:
             reader = csv.reader(io.TextIOWrapper(csvfile), delimiter=",", quotechar="\"")
             headers = None
-            num_messages = 0
             for row in reader:
                 if 1 == reader.line_num:
                     headers = row
@@ -77,9 +77,9 @@ def load_thinknook_data():
                 targets.append(
                     thinknook_sentiment_to_sentiment(zipped["Sentiment"]))
                 num_messages += 1
-                if num_messages == 100000:
-                    break
-    logger.info("Loaded %d messages from thinknook dataset", len(messages))
+                if num_messages % 100000 == 0:
+                    logger.info("Loaded %d messages from thinknook dataset", num_messages)
+    logger.info("Finally: %d messages from thinknook dataset have been loaded", num_messages)
     return messages, targets
 
 
