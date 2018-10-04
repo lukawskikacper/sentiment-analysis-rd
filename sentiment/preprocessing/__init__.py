@@ -16,7 +16,14 @@ class TextPreprocessor(object):
     """
 
     def preprocess(self, message):
-        raise NotImplementedError("Method .preprocess is not implemented")
+        raise NotImplementedError("Method preprocess is not implemented")
+
+    def __call__(self, message):
+        """Calls the preprocess method on given message. It is done to fulfill the scikit design."""
+        return self.preprocess(message)
+
+    def __str__(self):
+        return "{}()".format(self.__class__.__name__)
 
 
 class TwitterTextPreprocessor(TextPreprocessor):
@@ -36,7 +43,7 @@ class TwitterTextPreprocessor(TextPreprocessor):
     URL_REGEX = re.compile(r"(?:(http://)|(www\.))(\S+\b/?)"
                            r"([!\"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]*)(\s|$)",
                            re.UNICODE | re.I)
-    HASHTAG_REGEX = re.compile(r"#([^ ]+)$", re.UNICODE | re.I)
+    HASHTAG_REGEX = re.compile(r"#([^ ]+)", re.UNICODE | re.I)
     MENTION_REGEX = re.compile(r"@([a-z0-9_]+)", re.UNICODE | re.I)
     SPECIAL_CHARACTERS_REGEX = re.compile(r"\.|…|!|,|\?|:|\-|\(|\)|/|\\|\+|\*|~|`|\"|'|\[|\]|=|;", re.UNICODE | re.I)
     DUPLICATED_LETTER_REGEX = re.compile(r"([a-zA-Z])\1+", re.UNICODE | re.I)
@@ -45,7 +52,7 @@ class TwitterTextPreprocessor(TextPreprocessor):
         message = raw_message.lower()
         # encoding HTML entitites
         message = html.unescape(message.strip())
-        # changing emojis to textual representation
+        # replace emojis with their textual representation
         for emoji, text_description in self.EMOJI_MAPPING.items():
             message = message.replace(emoji, text_description)
         # removing non-informative parts
@@ -55,8 +62,7 @@ class TwitterTextPreprocessor(TextPreprocessor):
         message = self.SPECIAL_CHARACTERS_REGEX.sub(" ", message)
         # handling recognized common behaviour
         message = self.DUPLICATED_LETTER_REGEX.sub("\\1", message)
-        logger.debug("Message '%s' preprocessed to '%s'", raw_message, message)
-        return message
+        return message.strip()
 
 
 class StemmingTextPreprocessor(TwitterTextPreprocessor):
@@ -66,10 +72,10 @@ class StemmingTextPreprocessor(TwitterTextPreprocessor):
 
     def __init__(self):
         super().__init__()
-        self.stemmer = PorterStemmer()
+        self._stemmer = PorterStemmer()
 
     def preprocess(self, raw_message):
         preprocessed_message = super().preprocess(raw_message)
         words = preprocessed_message.split()
-        message = " ".join(map(self.stemmer.stem, words))
+        message = " ".join(map(self._stemmer.stem, words))
         return message

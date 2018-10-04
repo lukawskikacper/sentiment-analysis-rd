@@ -14,9 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 def airline_sentiment_to_sentiment(airline_sentiment):
-    if "positive" == airline_sentiment:
+    airline_sentiment_lower = airline_sentiment.lower()
+    if "positive" == airline_sentiment_lower:
         return Sentiment.POSITIVE
-    if "negative" == airline_sentiment:
+    if "negative" == airline_sentiment_lower:
         return Sentiment.NEGATIVE
     return Sentiment.NEUTRAL
 
@@ -93,3 +94,27 @@ def load_emoji_mapping():
     input_file_path = resource_filename(__name__, "../data/emoji_mapping.properties")
     with open(input_file_path, "r", encoding="unicode_escape", errors="replace") as file:
         return dict(ftfy.fix_text(line).split("=", 1) for line in file)
+
+
+def load_codete_sentiment_data():
+    """
+    Loads the data from codete-sentiment-dataset.csv file and returns it as
+    two iterables - one of raw tweets and another one as a list of targets
+    (negative, neutral, positive). The order of both lists is kept.
+    :return: messages, targets
+    """
+    messages, targets = [], []
+    input_file_path = resource_filename(__name__, "../data/codete-sentiment-dataset.csv")
+    with open(input_file_path, "r") as csvfile:
+        reader = csv.reader(csvfile, delimiter=",", quotechar="\"")
+        headers = None
+        for row in reader:
+            if 1 == reader.line_num:
+                headers = row
+                continue
+            zipped = dict(zip(headers, row))
+            messages.append(zipped["content"].strip())
+            targets.append(
+                airline_sentiment_to_sentiment(zipped["most_probable_sentiment"]))
+    logger.info("Loaded %d messages from codete dataset", len(messages))
+    return messages, targets

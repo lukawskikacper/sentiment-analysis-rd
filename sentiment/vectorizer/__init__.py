@@ -1,32 +1,52 @@
+import six
 import numpy as np
 import logging
 
 from scipy.sparse import hstack
+from sklearn.base import BaseEstimator
 from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, VectorizerMixin
 from sentiment.loader import load_emoji_mapping
 
 # Get logger for current module
 logger = logging.getLogger(__name__)
 
 
-class PCATfidfVectorizer(TfidfVectorizer):
+class CountingVectorizer(CountVectorizer):
     """
-    An extension of TfidfVectorizer with additional PCA, which limits the dimensionality
+    Extended CountVectorizer that additionally fits the preprocessor while fitting itself.
     """
 
-    def __init__(self, input='content', encoding='utf-8', decode_error='strict', strip_accents=None, lowercase=True,
-                 preprocessor=None, tokenizer=None, analyzer='word', stop_words=None, token_pattern=r"(?u)\b\w\w+\b",
-                 ngram_range=(1, 1), max_df=1.0, min_df=1, max_features=None, vocabulary=None, binary=False,
-                 dtype=np.int64, norm='l2', use_idf=True, smooth_idf=True, sublinear_tf=False,
-                 pca_n_component=500, pca_n_iter=2, pca_random_state=42):
-        super().__init__(input, encoding, decode_error, strip_accents, lowercase, preprocessor, tokenizer, analyzer,
-                         stop_words, token_pattern, ngram_range, max_df, min_df, max_features, vocabulary, binary,
-                         dtype, norm, use_idf, smooth_idf, sublinear_tf)
+    def fit_transform(self, raw_documents, y=None):
+        if self.tokenizer is not None:
+            preprocess = self.build_preprocessor()
+            self.tokenizer.fit(map(preprocess, raw_documents))
+        return super().fit_transform(raw_documents, y)
+
+
+class TFIDFVectorizer(TfidfVectorizer):
+    """
+    Extended TfidfVectorizer that fits the preprocessor while fitting itself.
+    """
+
+    def fit_transform(self, raw_documents, y=None):
+        if self.tokenizer is not None:
+            preprocess = self.build_preprocessor()
+            self.tokenizer.fit(map(preprocess, raw_documents))
+        return super().fit_transform(raw_documents, y)
+
+
+class PCATfidfVectorizer(TFIDFVectorizer):
+    """
+    An extension of TFIDFVectorizer with additional PCA, which limits the dimensionality.
+    """
+
+    def __init__(self, pca_n_component=500, pca_n_iter=2, pca_random_state=42, **kwargs):
+        super().__init__(input, **kwargs)
         self._pca = TruncatedSVD(n_components=pca_n_component, n_iter=pca_n_iter, random_state=pca_random_state)
 
     def fit(self, raw_documents, y=None):
-        vectorized_documents = super().fit_transform(raw_documents, y)
+        vectorized_documents = self.fit_transform(raw_documents, y)
         return self._pca.fit(vectorized_documents, y)
 
     def transform(self, raw_documents, copy=True):
@@ -44,16 +64,8 @@ class FeatureAndCountVectorizer(CountVectorizer):
     features of given texts.
     """
 
-    def __init__(self, input='content', encoding='utf-8',
-                 decode_error='strict', strip_accents=None, lowercase=True,
-                 preprocessor=None, tokenizer=None, stop_words=None,
-                 token_pattern=r"(?u)\b\w\w+\b", ngram_range=(1, 1),
-                 analyzer='word', max_df=1.0, min_df=1, max_features=None,
-                 vocabulary=None, binary=False, dtype=np.int64):
-        super().__init__(input, encoding, decode_error, strip_accents,
-                         lowercase, preprocessor, tokenizer, stop_words,
-                         token_pattern, ngram_range, analyzer, max_df, min_df,
-                         max_features, vocabulary, binary, dtype)
+    def __init__(self, **kwargs):
+        super().__init__(input, **kwargs)
         self._features = [
             (self._length_feature, None),
             (self._character_count_feature, ("!",)),
@@ -64,6 +76,9 @@ class FeatureAndCountVectorizer(CountVectorizer):
             self._features.append((self._character_count_feature, (emoji, )))
 
     def fit_transform(self, raw_documents, y=None):
+        if self.tokenizer is not None:
+            preprocess = self.build_preprocessor()
+            self.tokenizer.fit(map(preprocess, raw_documents))
         count_vectors = super().fit_transform(raw_documents, y)
         extended_vectors = self._append_text_features(count_vectors,
                                                       raw_documents)
@@ -89,3 +104,28 @@ class FeatureAndCountVectorizer(CountVectorizer):
 
     def _character_count_feature(self, raw_documents, character):
         return list(map(lambda x: x.count(character), raw_documents))
+
+
+class Doc2VecVectorizer(BaseEstimator, VectorizerMixin):
+    """
+    A vectorizer performing a document embedding, so called doc2vec.
+    """
+
+    def fit(self, raw_documents, y=None):
+        self.fit(raw_documents, y)
+        return self
+
+    def fit_transform(self, raw_documents, y=None):
+        if self.tokenizer is not None:
+            self.tokenizer.fit(raw_documents)
+        X = np.matrix
+        return X
+
+    def transform(self, raw_documents):
+        if isinstance(raw_documents, six.string_types):
+            raise ValueError(
+                "Iterable over raw text documents expected, "
+                "string object received.")
+
+        X = np.matrix
+        return X

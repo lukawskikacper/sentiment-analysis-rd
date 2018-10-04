@@ -4,3 +4,6 @@ nltk==3.2.4
 dill==0.2.7.1
 ftfy==5.1.1
 matplotlib==2.2.2
+pandas==0.23.0
+gensim==3.4.0
+xgboost==0.71
