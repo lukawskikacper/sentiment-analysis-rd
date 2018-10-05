@@ -8,7 +8,7 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
 
 setup(
     name='sentiment-analysis-rd',
-    version='1.2.0',
+    version='1.2.1',
     package_dir={'sentiment': './sentiment',
                  'sentiment.data': './sentiment/data',
                  'sentiment.loader': './sentiment/loader',

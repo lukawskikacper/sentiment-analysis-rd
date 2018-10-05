@@ -1,8 +1,6 @@
 import logging
 import collections
 
-from typing import Sequence
-
 # Creates the package-level logger
 from sentiment.tokenizing.exception import WrongArgumentException, EmptyTextValueException, RedundantValueException
 
@@ -80,7 +78,7 @@ class BaseTokenizer(object):
         """
         raise NotImplementedError("Method fit of the {} class is not implemented".format(self.__class__))
 
-    def tokenize(self, document: str) -> Sequence[Token]:
+    def tokenize(self, document: str):
         """
         Tokenizes given document and returns an iterable of all the found tokens.
         :param document: string to be tokenized
@@ -105,7 +103,7 @@ class SplitTokenizer(BaseTokenizer):
         """This kind of tokenizer does not require any training"""
         return
 
-    def tokenize(self, document: str) -> Sequence[Token]:
+    def tokenize(self, document: str):
         """Splits the document by white-characters"""
         for substring in document.split():
             yield Token.from_string(substring)
@@ -153,7 +151,7 @@ class PhraseTokenizer(BaseTokenizer):
         # Display the statistics of collected vocabulary
         self.__display_vocabulary_stats()
 
-    def tokenize(self, document: str) -> Sequence[Token]:
+    def tokenize(self, document: str):
         document_tokens = []
         for subtokens in self._iterate_tokens(self._split_words(document)):
             token = self._add_subtokens(subtokens)
@@ -172,7 +170,7 @@ class PhraseTokenizer(BaseTokenizer):
         """Perform basic split of given document to basic, word-like, units."""
         return tuple(Token.from_string(word) for word in document.split())
 
-    def _iterate_tokens(self, words: Sequence[Token]):
+    def _iterate_tokens(self, words):
         """Iterates through all the tokens in given document and yields them."""
         for entry_length in range(self._max_length):
             document_list = list(words)
